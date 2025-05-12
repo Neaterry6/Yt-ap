@@ -1,3 +1,4 @@
+
 from flask import Flask, request, jsonify
 import yt_dlp
 
@@ -40,5 +41,6 @@ def download():
 
     return jsonify({"message": "Download complete!", "title": video_info["title"]})
 
+# ✅ Fix Flask Binding for Render (Listen on All IPs)
 if __name__ == "__main__":
-    app.run(debug=True)  # ✅ Fixed the missing closing parenthesis!
+    app.run(host="0.0.0.0", port=5000, debug=True)
