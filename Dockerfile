@@ -1,9 +1,18 @@
+# Use an official Python image
 FROM python:3.10
 
+# Set the working directory
 WORKDIR /app
 
+# Copy dependencies
 COPY requirements.txt .
 RUN pip install -r requirements.txt
 
-COPY app.py .
-ENTRYPOINT ["python", "app.py"
+# Copy the full app
+COPY . .
+
+# Expose the default Flask port
+EXPOSE 5000
+
+# Run the Flask app
+CMD ["python", "app.py"]
