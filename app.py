@@ -1,4 +1,3 @@
-
 from flask import Flask, request, jsonify
 import yt_dlp
 
@@ -16,7 +15,12 @@ def search():
     if not query:
         return jsonify({"error": "Provide a search query!"}), 400
 
-    options = {"default_search": "ytsearch5", "dump_single_json": True}
+    options = {
+        "default_search": "ytsearch5",
+        "dump_single_json": True,
+        "cookiefile": "cookies.json"  # ✅ Using JSON cookies
+    }
+
     with yt_dlp.YoutubeDL(options) as ydl:
         search_results = ydl.extract_info(query, download=False)
 
@@ -34,6 +38,7 @@ def download():
     options = {
         "format": "bestaudio/best" if format_type == "mp3" else "best",
         "postprocessors": [{"key": "FFmpegExtractAudio", "preferredcodec": format_type}],
+        "cookiefile": "cookies.json"  # ✅ Using JSON cookies for authentication
     }
 
     with yt_dlp.YoutubeDL(options) as ydl:
