@@ -41,4 +41,4 @@ def download():
     return jsonify({"message": "Download complete!", "title": video_info["title"]})
 
 if __name__ == "__main__":
-    app.run(debug=True
+    app.run(debug=True)  # ✅ Fixed the missing closing parenthesis!
