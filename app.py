@@ -1,5 +1,6 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_file
 import yt_dlp
+import os
 
 app = Flask(__name__)
 
@@ -8,7 +9,7 @@ app = Flask(__name__)
 def home():
     return jsonify({"message": "API is working!"})
 
-# 🔍 YouTube Search
+# 🔍 YouTube Search with More Results
 @app.route("/search")
 def search():
     query = request.args.get("q")
@@ -16,9 +17,8 @@ def search():
         return jsonify({"error": "Provide a search query!"}), 400
 
     options = {
-        "default_search": "ytsearch5",
-        "dump_single_json": True,
-        "cookiefile": "cookies.json"  # ✅ Using JSON cookies
+        "default_search": "ytsearch10",  # 🔍 Gets 10 results instead,
+        "cookiefile": "cookies.json"
     }
 
     with yt_dlp.YoutubeDL(options) as ydl:
@@ -26,7 +26,7 @@ def search():
 
     return jsonify(search_results.get("entries", []))
 
-# 🎵 Download YouTube Video or Audio
+# 🎵 Download YouTube Video or Audio (Streaming Optimized)
 @app.route("/download")
 def download():
     video_url = request.args.get("url")
@@ -37,15 +37,17 @@ def download():
 
     options = {
         "format": "bestaudio/best" if format_type == "mp3" else "best",
-        "postprocessors": [{"key": "FFmpegExtractAudio", "preferredcodec": format_type}],
-        "cookiefile": "cookies.json"  # ✅ Using JSON cookies for authentication
+        "postprocessors": [{"key": "FFmpegExtractAudio", "preferredcodec": format_type}] if format_type == "mp3" else [],
+        "cookiefile": "cookies.json",
+        "outtmpl": "downloaded.%(ext)s"
     }
 
     with yt_dlp.YoutubeDL(options) as ydl:
         video_info = ydl.extract_info(video_url, download=True)
+    
+    file_name = next((f for f in os.listdir() if f.startswith("downloaded")), None)
+    return send_file(file_name, as_attachment=True) if file_name else jsonify({"error": "Download failed."})
 
-    return jsonify({"message": "Download complete!", "title": video_info["title"]})
-
-# ✅ Fix Flask Binding for Render (Listen on All IPs)
+# ✅ Fix Flask Binding (Listen on All IPs)
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    app.run(host="0.0.0.0", port=5000)
