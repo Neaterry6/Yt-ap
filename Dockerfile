@@ -1,18 +1,24 @@
-# Use an official Python image
-FROM python:3.10
+# Use lightweight Python image
+FROM python:3.11-slim
 
-# Set the working directory
+# Set working directory
 WORKDIR /app
 
-# Copy dependencies
-COPY requirements.txt .
-RUN pip install -r requirements.txt
+# Install system dependencies for yt-dlp and ffmpeg
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ffmpeg \
+    && rm -rf /var/lib/apt/lists/*
 
-# Copy the full app, including cookies
+# Copy and install Python dependencies
+COPY requirements.txt .
+RUN pip install --no-cache-dir --upgrade pip \
+    && pip install --no-cache-dir -r requirements.txt
+
+# Copy application files
 COPY . .
 
-# Expose the default Flask port
+# Expose port 5000
 EXPOSE 5000
 
-# Run the Flask app
+# Start Flask app
 CMD ["python", "app.py"]
